@@ -20,6 +20,13 @@
     font-display: swap;
 }
 
+/* Bootstrap Icons - 모든 아이콘 색상 통일 (Safari 호환) */
+.bi,
+i.bi,
+[class*="bi-"] {
+    color: #2c291a !important;
+}
+
 /* Reset and Base Styles */
 * {
     margin: 0;
@@ -208,6 +215,7 @@ header h1 {
     font-size: 28px;
     flex-shrink: 0;
     filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 0.2));
+    color: #2c291a !important;
 }
 
 .category-btn.active .category-icon {
@@ -302,6 +310,7 @@ header h1 {
 .icon-emoji {
     font-size: 28px;
     filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.2));
+    color: #2c291a !important;
 }
 
 .action-btn {

@@ -48,25 +48,29 @@ const KOBIS_API_KEY = 'a89be2e5909e14c0e4325b05d12eab06'; // 영화진흥위원�
 const KOBIS_API_BASE_URL = 'https://corsproxy.io/?http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieList.json';
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     loadMovies();
     loadNote();
     loadTimetable();
     setupEventListeners();
-    renderMovies();
     renderTimetable();
     
     // 최초 접속 여부 확인 (LocalStorage에 '상영 중·예정' 영화가 없으면 최초 접속)
     const hasApiMovies = movies.some(m => m.status === '상영 중·예정' && m.apiMovieCd);
     if (!hasApiMovies) {
         console.log('최초 접속: API에서 영화 목록을 불러옵니다.');
-        loadMoviesFromAPI(); // 최초 접속 시에만 API 호출
+        // 최초 접속 시에만 API 호출하고 완료 후 렌더링
+        await loadMoviesFromAPI();
+        // loadMoviesFromAPI() 내부에서 이미 renderMovies()를 호출하므로
+        // switchTab만 호출하여 notice 문구 설정
+        switchTab(currentStatus);
     } else {
         console.log('이미 저장된 영화 데이터가 있습니다. 새로고침 버튼을 눌러 업데이트하세요.');
+        // 기존 데이터가 있으면 먼저 렌더링
+        renderMovies();
+        // 초기 상태에서 notice 문구 설정을 위해 switchTab 호출
+        switchTab(currentStatus);
     }
-    
-    // 초기 상태에서 notice 문구 설정을 위해 switchTab 호출
-    switchTab(currentStatus);
 });
 
 // Event Listeners Setup
