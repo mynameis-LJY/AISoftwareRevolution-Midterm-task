@@ -58,10 +58,6 @@ body {
     z-index: 1;
     width: 100%;
     flex: 1;
-    background-image: url('bgimage.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -544,7 +540,7 @@ header h1 {
     justify-content: center;
     flex-shrink: 1;
     min-height: 0;
-    max-height: 120px;
+    max-height: 250px;
     overflow-y: auto;
 }
 
