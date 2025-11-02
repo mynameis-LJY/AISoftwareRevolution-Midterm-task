@@ -211,26 +211,65 @@ function autoDeleteExpiredMovies() {
             return true;
         }
         
-        const releaseDate = new Date(movie.releaseDate);
-        releaseDate.setHours(0, 0, 0, 0); // 시간 부분 제거
+        // 관람일이 정해지지 않은 영화('미정')는 삭제하지 않음
+        if (!movie.watchDate || movie.watchDate === '미정') {
+            return true;
+        }
         
-        // 다른 카테고리('시청 고민', '관람 예정', '시청 완료')는 현재 날짜 기준 앞뒤 3주 범위 내의 영화만 유지
-        return releaseDate >= threeWeeksAgo && releaseDate <= threeWeeksLater;
+        // 관람일 기준으로 ±21일 범위를 벗어난 영화 삭제
+        const watchDate = new Date(movie.watchDate);
+        watchDate.setHours(0, 0, 0, 0); // 시간 부분 제거
+        
+        // 관람일로부터 ±21일 범위를 벗어난 영화 삭제
+        return watchDate >= threeWeeksAgo && watchDate <= threeWeeksLater;
     });
     
     const deletedCount = beforeCount - movies.length;
     if (deletedCount > 0) {
-        console.log(`${deletedCount}개의 영화가 3주 범위를 벗어나 자동으로 삭제되었습니다. ('상영 중·예정' 제외)`);
+        console.log(`${deletedCount}개의 영화가 관람일 기준 3주 범위를 벗어나 자동으로 삭제되었습니다. ('상영 중·예정' 제외)`);
     }
 }
 
-// Sort movies by release date (ascending)
+// Sort movies by release date or watch date (ascending)
 function sortMovies() {
-    movies.sort((a, b) => {
+    // 카테고리별로 분리하여 각각 정렬 후 다시 합치기
+    const apiMovies = movies.filter(m => m.status === '상영 중·예정');
+    const otherMovies = movies.filter(m => m.status !== '상영 중·예정');
+    
+    // '상영 중·예정' 카테고리는 개봉일 기준 오름차순
+    apiMovies.sort((a, b) => {
         const dateA = new Date(a.releaseDate);
         const dateB = new Date(b.releaseDate);
         return dateA - dateB;
     });
+    
+    // 다른 카테고리('시청 고민', '관람 예정', '시청 완료')는 관람일 기준 오름차순
+    otherMovies.sort((a, b) => {
+        const hasWatchDateA = a.watchDate && a.watchDate !== '미정' && a.watchDate !== '';
+        const hasWatchDateB = b.watchDate && b.watchDate !== '미정' && b.watchDate !== '';
+        
+        // 관람일이 정해지지 않은 영화('미정')는 맨 위로
+        if (!hasWatchDateA && hasWatchDateB) {
+            return -1; // a가 위로 (미정이 위로)
+        }
+        if (hasWatchDateA && !hasWatchDateB) {
+            return 1; // b가 위로 (미정이 위로)
+        }
+        if (!hasWatchDateA && !hasWatchDateB) {
+            // 둘 다 관람일이 없으면 개봉일 기준 정렬
+            const dateA = new Date(a.releaseDate);
+            const dateB = new Date(b.releaseDate);
+            return dateA - dateB;
+        }
+        
+        // 둘 다 관람일이 있으면 관람일 기준 정렬
+        const watchDateA = new Date(a.watchDate);
+        const watchDateB = new Date(b.watchDate);
+        return watchDateA - watchDateB;
+    });
+    
+    // 다시 합치기 (원하는 카테고리 순서 유지)
+    movies = [...apiMovies, ...otherMovies];
 }
 
 // Tab Management
