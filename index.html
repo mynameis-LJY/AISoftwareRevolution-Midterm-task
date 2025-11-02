@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY MOVIE LIST</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container-wrapper">
+        <div class="container">
+        <div class="main-content">
+            <!-- Main Content Header Wrapper (header + movie-list-container) -->
+            <div class="main-content-header-wrapper">
+                <!-- Header inside main-content, above movie-list-container -->
+                <header>
+                    <h1>MY MOVIE LIST</h1>
+                </header>
+
+                <!-- Main Content: Movie List (65%) - 좌측 -->
+                <main class="movie-list-container">
+                    <div id="movie-list" class="movie-list">
+                        <!-- Movie cards will be dynamically inserted here -->
+                    </div>
+                </main>
+            </div>
+
+            <!-- Sidebar: Categories (35%) - 우측 -->
+            <aside class="sidebar">
+                <div class="sidebar-content">
+                    <h2 class="sidebar-title">CATEGORY</h2>
+                    <div class="category-list" id="category-list">
+                        <button class="category-btn active" data-status="시청 고민">
+                            <i class="bi bi-chat-dots-fill category-icon"></i>
+                            <span class="category-text">시청 고민</span>
+                        </button>
+                        <button class="category-btn" data-status="관람 예정">
+                            <i class="bi bi-basket-fill category-icon"></i>
+                            <span class="category-text">관람 예정</span>
+                        </button>
+                        <button class="category-btn" data-status="시청 완료">
+                            <i class="bi bi-check-square-fill category-icon"></i>
+                            <span class="category-text">시청 완료</span>
+                        </button>
+                        <button class="category-btn" data-status="상영 중·예정">
+                            <i class="bi bi-film category-icon"></i>
+                            <span class="category-text">상영 중·예정</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Notice Box (모든 카테고리에서 보임) -->
+                    <div class="notice-box" id="notice-box" style="display: flex;">
+                        <div class="notice-text" id="notice-text">
+                            <!-- 동적으로 내용이 채워집니다 -->
+                        </div>
+                    </div>
+                    
+                    <!-- Button Container Wrapper -->
+                    <div class="button-container-wrapper">
+                        <!-- Refresh Button (상영 중·예정 카테고리에서만 보임) -->
+                        <div class="refresh-button-container" id="refresh-button-container" style="display: none;">
+                            <button class="icon-btn" id="refresh-api-btn" title="영화 목록 새로고침">
+                                <i class="bi bi-arrow-repeat icon-emoji"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Icon Buttons -->
+                        <div class="icon-buttons">
+                            <button class="icon-btn" id="note-btn" title="노트">
+                                <i class="bi bi-cup-hot-fill icon-emoji"></i>
+                            </button>
+                            <button class="icon-btn" id="timetable-btn" title="시간표">
+                                <i class="bi bi-table icon-emoji"></i>
+                            </button>
+                            <button class="icon-btn" id="slate-btn" title="슬레이트">
+                                <i class="bi bi-ticket-perforated icon-emoji"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+        <!-- Floating Action Button -->
+        <button id="add-movie-btn" class="fab" aria-label="영화 추가">
+            <span class="fab-icon">+</span>
+        </button>
+
+        <!-- Add/Edit Movie Modal -->
+        <div id="movie-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-title">영화 추가</h2>
+                    <button class="close-btn" id="close-modal">&times;</button>
+                </div>
+                <form id="movie-form">
+                    <input type="hidden" id="movie-id">
+                    
+                    <div class="form-group">
+                        <label for="movie-title">영화 제목</label>
+                        <input type="text" id="movie-title" required placeholder="영화 제목을 입력하세요">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="movie-date">개봉 일자</label>
+                        <input type="date" id="movie-date" required>
+                    </div>
+
+                    <div class="form-group" id="watch-date-group">
+                        <label for="movie-watch-date">관람 일자 <small class="form-hint">미정일 경우 비워두세요</small></label>
+                        <input type="date" id="movie-watch-date">
+                    </div>
+
+                    <div class="form-group" id="status-group">
+                        <label for="movie-status">상태</label>
+                        <select id="movie-status" required>
+                            <option value="시청 고민">시청 고민</option>
+                            <option value="관람 예정">관람 예정</option>
+                            <option value="시청 완료">시청 완료</option>
+                            <option value="상영 중·예정">상영 중·예정</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary">저장</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-btn">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Note Modal -->
+        <div id="note-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="bi bi-cup-hot-fill"></i> 제작 동기</h2>
+                    <button class="close-btn" id="close-note-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="note-content" class="note-textarea" readonly></textarea>
+                    <div class="note-author" id="note-author"></div>
+                    <div class="note-copyright">
+                        이 사이트는 국민대학교 AI와소프트웨어혁명 과제 제출용으로 제작된 비상업 목적의 사이트입니다.<br>
+                        영화 정보 API는 영화진흥위원회(KOBIS)의 제공을 받았습니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timetable Modal -->
+        <div id="timetable-modal" class="modal">
+            <div class="modal-content timetable-modal-content">
+                <div class="modal-header">
+                    <h2><i class="bi bi-table"></i> 영화 시간표</h2>
+                    <button class="close-btn" id="close-timetable-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="timetable-container">
+                        <div class="timetable-grid" id="timetable-grid">
+                            <!-- 시간표 그리드가 여기에 동적으로 생성됩니다 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slate Modal -->
+        <div id="slate-modal" class="modal">
+            <div class="modal-content slate-modal-content">
+                <div class="modal-header">
+                    <h2><i class="bi bi-ticket-perforated"></i> 상영 시간표 바로 가기</h2>
+                    <button class="close-btn" id="close-slate-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="theater-links">
+                        <a href="https://cgv.co.kr/cnm/movieBook" target="_blank" class="theater-link">
+                            <span class="theater-name">CGV</span>
+                        </a>
+                        <a href="https://www.megabox.co.kr/booking/timetable" target="_blank" class="theater-link">
+                            <span class="theater-name">메가박스</span>
+                        </a>
+                        <a href="https://www.lottecinema.co.kr/NLCHS/Ticketing/Schedule" target="_blank" class="theater-link">
+                            <span class="theater-name">롯데시네마</span>
+                        </a>
+                        <a href="https://www.cineq.co.kr/Theater/Movie?TheaterCode=1001" target="_blank" class="theater-link">
+                            <span class="theater-name">씨네큐</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
